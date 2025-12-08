@@ -20,7 +20,7 @@ public class MonoSingletonBase<T> : MonoBehaviour where T : MonoBehaviour
                     _instance = FindObjectOfType<T>();
                     if (_instance == null)
                     {
-                        GameObject go = new GameObject("(Singleton)GameManager");
+                        GameObject go = new GameObject($"(Singleton){typeof(T).Name}");
                         _instance = go.AddComponent<T>();
                         DontDestroyOnLoad(go);
                     }
