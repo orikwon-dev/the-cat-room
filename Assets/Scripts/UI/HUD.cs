@@ -3,7 +3,7 @@ using MyCat.Domain;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace MyCat.UI
+namespace MyCat.Runtime.UI
 {
     public class HUD : MonoBehaviour
     {
