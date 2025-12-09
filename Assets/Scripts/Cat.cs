@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace MyCat
+namespace MyCat.Runtime
 {
     public class Cat : MonoBehaviour
     {
@@ -10,6 +10,14 @@ namespace MyCat
         private void Awake()
         {
             _catVisual = GetComponentInChildren<CatVisual>();
+        }
+
+        private void Update()
+        {
+            if (GameManager.Instance != null)
+            {
+                _catVisual.SetCatState(GameManager.Instance.CurrentStatus.GetState());
+            }
         }
     }
 }
