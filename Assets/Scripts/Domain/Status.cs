@@ -5,6 +5,7 @@ namespace MyCat.Domain
 {
     public enum StateType
     {
+        NotDetermined = -1,
         Normal,  // 일반적인 상태
         Happy,   // 행복한 상태
         Hungry,  // 배고픔
