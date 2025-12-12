@@ -1,6 +1,7 @@
 using MyCat.Domain;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 namespace MyCat.Runtime.UI
 {
@@ -12,6 +13,12 @@ namespace MyCat.Runtime.UI
         
         [Header("Coin")]
         [SerializeField] private Text _coinText;
+        [SerializeField] private Text _coinDeltaText;
+        [SerializeField] private float _coinDeltaTextLifeTime = 1.0f;
+
+        private bool _isCoinDeltaTextShowing = false;
+        private long _accumulatedDelta = 0;
+        private float _accumulatedTime = 0;
         
         private void Start()
         {
@@ -22,6 +29,8 @@ namespace MyCat.Runtime.UI
 
             PlayData curPlayData = PlayDataManager.Instance.CurrentPlayData;
             curPlayData.OnCoinAmountChanged += UpdateCoinText;
+            curPlayData.OnCoinAdded += OnCoinAdded;
+            curPlayData.OnCoinRemoved += OnCoinRemoved;
             
             UpdateStatusTexts();
             UpdateCoinText(curPlayData.CurrentCoins);
@@ -43,9 +52,76 @@ namespace MyCat.Runtime.UI
             _stateText.text = $"State : {curStatus.GetState().ToString()}";
         }
 
-        private void UpdateCoinText(ulong coin)
+        private void UpdateCoinText(long coin)
         {
             _coinText.text = string.Format("{0:N0}", coin);
+        }
+
+        private void OnCoinAdded(long delta)
+        {
+            if (delta == 0)
+            {
+                return;
+            }
+
+            _accumulatedDelta += delta;
+            _accumulatedTime += _coinDeltaTextLifeTime;
+            if (_isCoinDeltaTextShowing)
+            {
+                UpdateDeltaTextFromAccumulatedDelta();
+            }
+            else
+            {
+                StartCoroutine(ShowDeltaCoinString());
+            }
+        }
+
+        private void OnCoinRemoved(long delta)
+        {
+            if (delta == 0)
+            {
+                return;
+            }
+            
+            _accumulatedDelta -= delta;
+            _accumulatedTime += _coinDeltaTextLifeTime;
+            if (_isCoinDeltaTextShowing)
+            {
+                UpdateDeltaTextFromAccumulatedDelta();
+            }
+            else
+            {
+                StartCoroutine(ShowDeltaCoinString());
+            }
+        }
+
+        private IEnumerator ShowDeltaCoinString()
+        {
+            _isCoinDeltaTextShowing = true;
+            _coinDeltaText.gameObject.SetActive(true);
+            UpdateDeltaTextFromAccumulatedDelta();
+            
+            float elapsedTime = 0;
+            while (elapsedTime < _accumulatedTime)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            
+            _isCoinDeltaTextShowing = false;
+            _coinDeltaText.gameObject.SetActive(false);
+            _accumulatedDelta = 0;
+        }
+
+        private void UpdateDeltaTextFromAccumulatedDelta()
+        {
+            if (_coinDeltaText == null)
+            {
+                return;
+            }
+
+            string formatString = (_accumulatedDelta >= 0) ? "+{0:N0}" : "-{0:N0}";
+            _coinDeltaText.text = string.Format(formatString, _accumulatedDelta);
         }
     }
 }
