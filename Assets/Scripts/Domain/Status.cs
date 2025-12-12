@@ -1,38 +1,52 @@
-using UnityEngine;
 using System;
+using Math = System.Math;
 
 namespace MyCat.Domain
 {
     public enum StateType
     {
         NotDetermined = -1,
-        Normal,  // 일반적인 상태
-        Happy,   // 행복한 상태
-        Hungry,  // 배고픔
-        Bored,   // 심심함
+        Normal, // 일반적인 상태
+        Happy, // 행복한 상태
+        Hungry, // 배고픔
+        Bored, // 심심함
         Illness, // 아픔
     }
-    
+
     public enum StatusType
     {
-        Hunger = 0,  // 포만감 수치. 밥을 주면 상승, 서서히 감소
-        Fun,         // 즐거움 수치. 놀아주면 상승, 서서히 감소
+        Hunger = 0, // 포만감 수치. 밥을 주면 상승, 서서히 감소
+        Fun, // 즐거움 수치. 놀아주면 상승, 서서히 감소
         Cleanliness, // 청결 수치. 목욕을 시켜주면 완전 회복, 평시엔 서서히 감소/놀아주거나 밥을 먹이면 일정 수치 감소
-        Happiness,   // 애정도 수치. 모든 스탯 중 하나라도 50% 미만이면 서서히 감소. 아프거나 전반적으로 수치가 낮으면 빠르게 감소
+        Happiness, // 애정도 수치. 모든 스탯 중 하나라도 50% 미만이면 서서히 감소. 아프거나 전반적으로 수치가 낮으면 빠르게 감소
         Count
+    }
+
+    public struct StatusChangeParam
+    {
+        public StatusType StatusType;
+        public float Delta;
+
+        public StatusChangeParam(StatusType statusType, float delta)
+        {
+            StatusType = statusType;
+            Delta = delta;
+        }
     }
 
     public class Status
     {
         public event Action OnChange;
+        public event Action<StatusChangeParam> OnStatusIncresed; // float: delta
+        public event Action<StatusChangeParam> OnStatusDecresed; // float: delta
         private float[] _statValues;
-        
+
         // 매번 enum 을 호출하기 싫어서 편의성을 위해 추가함
         public float Hunger => GetStat(StatusType.Hunger);
         public float Fun => GetStat(StatusType.Fun);
         public float Cleanliness => GetStat(StatusType.Cleanliness);
         public float Happiness => GetStat(StatusType.Happiness);
-        
+
         public Status()
         {
             _statValues = new float[(int)StatusType.Count];
@@ -46,15 +60,15 @@ namespace MyCat.Domain
             SetStat(StatusType.Cleanliness, 50);
             SetStat(StatusType.Happiness, 50);
         }
-        
-        
+
+
         public float GetStat(StatusType statusType)
         {
             if (HasValue(statusType) == false)
             {
                 return -1f;
             }
-            
+
             return _statValues[(int)statusType];
         }
 
@@ -74,10 +88,17 @@ namespace MyCat.Domain
             {
                 return;
             }
-            
-            _statValues[(int)statusType] += deltaValue;
-            _statValues[(int)statusType] = Mathf.Clamp(_statValues[(int)statusType], 0, 100);
+
+            float remainToMax = 100.0f - _statValues[(int)statusType];
+            float realIncreasedValue = Math.Min(remainToMax, deltaValue);
+            _statValues[(int)statusType] += realIncreasedValue;
+
             OnChange?.Invoke();
+
+            if (realIncreasedValue > 0.0f)
+            {
+                OnStatusIncresed?.Invoke(new StatusChangeParam(statusType, realIncreasedValue));
+            }
         }
 
         public void ReduceStat(StatusType statusType, float deltaValue)
@@ -96,10 +117,16 @@ namespace MyCat.Domain
             {
                 return;
             }
-            
-            _statValues[(int)statusType] -= deltaValue;
-            _statValues[(int)statusType] = Mathf.Clamp(_statValues[(int)statusType], 0, 100);
+
+            // 음수로 내려가지 않게 하는 감소치
+            float realDecreasedValue = Math.Min(_statValues[(int)statusType], deltaValue);
+            _statValues[(int)statusType] -= realDecreasedValue;
             OnChange?.Invoke();
+
+            if (realDecreasedValue > 0.0f)
+            {
+                OnStatusDecresed?.Invoke(new StatusChangeParam(statusType, realDecreasedValue));
+            }
         }
 
         public StateType GetState()
@@ -118,7 +145,7 @@ namespace MyCat.Domain
             {
                 return StateType.Hungry;
             }
-            
+
             // 조건 : 즐거움이 낮으면 지루함
             if (Fun <= 50.0f)
             {
@@ -133,14 +160,14 @@ namespace MyCat.Domain
 
             return StateType.Normal;
         }
-        
+
         private void SetStat(StatusType statusType, float newValue)
         {
             if (HasValue(statusType) == false)
             {
                 return;
             }
-            
+
             _statValues[(int)statusType] = newValue;
             OnChange?.Invoke();
         }

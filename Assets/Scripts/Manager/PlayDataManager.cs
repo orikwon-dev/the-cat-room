@@ -1,4 +1,3 @@
-using UnityEngine;
 using MyCat.Domain;
 
 namespace MyCat.Runtime
