@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a18df3768cc6e40b6bd290f09b64d272, type: 3}
+  m_Name: GameConfig
+  m_EditorClassIdentifier: Assembly-CSharp::MyCat.Runtime.Data.GameConfig
+  GameConfigParameters:
+    StatusDecayIntervalSeconds: 1
+    HungerDecayAmount: 0.0069444445
+    FunDecayAmount: 0.013888889
+    CleanlinessDecayAmount: 0.0023148148
+    HappinessDecayAmount: 0.0011574074
+    HappinessDecayStartThreshold: 50
+    HappinessIncreaseStartThreshold: 0
+    HungerCareIncreaseAmount: 50
+    FunCareIncreaseAmount: 50
+    CleanlinessCareIncreaseAmount: 50
+    CareRewardAmount: 10
