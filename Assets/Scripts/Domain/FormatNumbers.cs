@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Collections.Generic;
 
 namespace MyCat.Domain
@@ -42,33 +43,6 @@ namespace MyCat.Domain
             }
             
             return value.ToString("0.##") + unit;
-        }
-        
-        // 빅넘버를 쓰지 않는 케이스에서 포매팅
-        public static string Format(double value)
-        {
-            if (value < 1d)
-            {
-                return "0";
-            }
-
-            var n = (int)Math.Log(value, 1000);
-            var m = value / Math.Pow(1000, n);
-            var unit = "";
-            if (n < units.Count)
-            {
-                unit = units[n];
-            }
-            else
-            {
-                var unitInt = n - units.Count;
-                var secondUnit = unitInt % 26;
-                var firstUnit = unitInt / 26;
-                unit = Convert.ToChar(firstUnit + charA).ToString()
-                       + Convert.ToChar(secondUnit + charA).ToString();
-            }
-
-            return (Math.Floor(m * 100) / 100).ToString("0.##") + unit;
         }
     }
 }

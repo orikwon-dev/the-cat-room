@@ -10,6 +10,8 @@ namespace MyCat.Runtime
         private void Awake()
         {
             GameConfig.Load();
+            GameManager.Instance.Initialize();
+            CurrencyManager.Instance.Initialize();
         }
     }
 }

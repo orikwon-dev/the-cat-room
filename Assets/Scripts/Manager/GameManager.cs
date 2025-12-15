@@ -19,9 +19,6 @@ namespace MyCat.Runtime
         {
             if (_isInitialized == false)
             {
-                // (기술부채) 여기서 등록하지 않게 방법 찾기
-                _status.OnStatusIncresed += OnStatusIncresed;
-
                 StartCoroutine(RealTimeUpdate());
                 _isInitialized = true;
             }
@@ -64,12 +61,6 @@ namespace MyCat.Runtime
             {
                 _status?.ReduceStat(StatusType.Happiness, GameConfig.Parameters.HappinessDecayAmount * elapsedSeconds);
             }
-        }
-
-        private void OnStatusIncresed(StatusChangeParam param)
-        { 
-            // (기술부채) 다른 매니저가 여기서 실핸된다는게 문제로 보임
-            PlayDataManager.Instance.CurrentPlayData.AddCoins(GameConfig.Parameters.CareRewardAmount);
         }
     }
 }
